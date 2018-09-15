@@ -1,0 +1,7 @@
+{
+  "name": "VoiceDrop",
+  "integrations": {
+    "cordova": {}
+  },
+  "type": "angular"
+}
