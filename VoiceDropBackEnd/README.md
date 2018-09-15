@@ -1,65 +1,4 @@
-# Node AWS Lambda Calculator Function
-
-This is the second part of my Node AWS Lambda series (Here is part 1: https://github.com/Gurenax/node-aws-lambda-function).
-
-This app demonstrates how to create a calculator function in AWS lambda and configure it as a POST request in the API Gateway. Unlike the API Gateway in part 1, this will not be configured as a trigger. It will be manually configured in the API Gateway.
-
-## `index.js`
-
-```javascript
-const R = require('ramda')
-
-exports.handler = (event, context, callback) => {
-  console.log('Received event:', JSON.stringify(event, null, 2))
-  if (
-    event.a === undefined ||
-    event.b === undefined ||
-    event.op === undefined
-  ) {
-    callback('400 Invalid Input')
-  }
-  if (isNaN(event.a) || isNaN(event.b)) {
-    callback('400 Invalid Operand')
-  }
-  try {
-    const response = calculate(event)
-    callback(null, response)
-  } catch (error) {
-    callback(error)
-  }
-}
-
-// Best practice to separate functions from handler
-const calculate = params => {
-  let result = 0
-  switch (params.op) {
-    case '+':
-    case 'add':
-      result = R.add(params.a, params.b)
-      break
-    case '-':
-    case 'sub':
-      result = R.subtract(params.a, params.b)
-      break
-    case '*':
-    case 'mul':
-      result = R.multiply(params.a, params.b)
-      break
-    case '/':
-    case 'div':
-      result = R.divide(params.a, params.b)
-      break
-    default:
-      throw new Error('400 Invalid Operator')
-  }
-  return {
-    a: params.a,
-    b: params.b,
-    op: params.op,
-    result: result
-  }
-}
-```
+# Node AWS Lambda Function
 
 ## Install
 
@@ -103,52 +42,9 @@ Install dependencies with `yarn install`
 
 12. Leave the Passthrough to its default value `Content Handling`
 
-13. Under APIs > Calculator, go to `Models`
-14. Create a new model `Input` with Content type `application/json`
-15. Paste the following to its Model schema:
-
-```javascript
-{
-    "type":"object",
-    "properties":{
-        "a":{"type":"number"},
-        "b":{"type":"number"},
-        "op":{"type":"string"}
-    },
-    "title":"Input"
-}
-```
-
 16. In `/calculator - POST`, go to `Method Request`.
 17. Add a Request Body of Content type `application/json` and Model name `Input`.
 18. You can now test the `POST` method if it works correctly.
 19. Go to Actions, `Deploy API`
 20. Select a development stage then `Deploy`
 21. Once deployed, you will be able to grab the Invoke URL and use it for a POST request.
-
-22. Execute the URL with the body parameters:
-```javascript
-{
-  "a": 1,
-  "b": 2,
-  "op": "+"
-}
-```
-
-23. The output should receive the following data:
-```javascript
-{
-  "a": 1,
-  "b": 2,
-  "op": "+",
-  "result": 3
-}
-```
-
-## Securing the API method with an API Key
-1. Under the `/calculator - POST` setting, select `Method Request`.
-2. Change the `API Key Required` to true.
-3. Create a `Usage Plan` called `Basic`.
-4. Create an `API Key` and Add it to usage plan Basic.
-5. Save and re-deploy the Calculator API
-6. When accessing the invoke URL, specify the request header `X-API-KEY` and use the API key generated in Step 4.
