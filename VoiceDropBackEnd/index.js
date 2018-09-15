@@ -5,10 +5,12 @@ const AWS = require('aws-sdk');
 const dynamoDB = new AWS.DynamoDB.DocumentClient();
 
 exports.handler = (event, context, callback) => {
+	var bucketName = process.env.S3_BUCKET;
+	console.log(bucketName);
 	console.log(event);
-	if(event.context['https-method'] === 'POST') {
+	if(event.endpoint === 'postData') {
 		postData(event, context, callback);
-	} else if (event.context['https-method'] === 'GET') {
+	} else if (event.endpoint === 'getData') {
 		getData(event, context, callback);
 	}
 	const response = {
@@ -18,7 +20,7 @@ exports.handler = (event, context, callback) => {
 	return callback(null, response);
 }
 
-function putData(event, context, callback) {
+function postData(event, context, callback) {
 	console.log("Putting!");
 }
 
