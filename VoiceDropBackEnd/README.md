@@ -6,13 +6,18 @@ Install dependencies with `yarn install`
 
 ## Deployment to AWS Lambda
 
-1.  Zip the contents of this folder (not the folder itself).
+1.  Zip the contents of this folder (not this folder itself, make sure this is.zip not .7z).
 2.  Go to AWS Lambda Console and crate a new Function
 3.  Under Code entry type, select Upload a .ZIP file
 4.  Rename the Handler to `index.handler`
 5.  Save the function
 6.  Create a test event and save the event
 7.  Click test and make sure it's working
+    Should display the following with the current time.
+    {
+      "statusCode": 200,
+      "body": "{\"message\":\"Hello, the current time is 11:55:55 GMT+0000 (UTC).\"}"
+    }
 
 ## Configure API Gateway
 
@@ -47,4 +52,16 @@ Install dependencies with `yarn install`
 18. You can now test the `POST` method if it works correctly.
 19. Go to Actions, `Deploy API`
 20. Select a development stage then `Deploy`
-21. Once deployed, you will be able to grab the Invoke URL and use it for a POST request.
+21. This will redirect you to the stage editor, on the left panel drop down your stage (beta)
+22. Select your function, and copy the Invoke URL
+
+Postman
+23. Install Postman https://www.getpostman.com/
+23. Upon opening postman, exit the pop-up options menu
+24. Make sure you select the POST method
+25. Paste in your Invoke URL copied from the API Gateway and send
+26. In the body, this should display the following with the current time.
+    {
+      "statusCode": 200,
+      "body": "{\"message\":\"Hello, the current time is 11:55:55 GMT+0000 (UTC).\"}" 
+    }
