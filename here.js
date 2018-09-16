@@ -28,19 +28,56 @@ var behavior = new H.mapevents.Behavior(new H.mapevents.MapEvents(map));
 var ui = H.ui.UI.createDefault(map, defaultLayers);
 
 //Current location (HARDCODED)
-var longitude = 25.75;
-var latitude = -80.37;
+// var longitude = 25.75;
+// var latitude = -80.37;
+// var userName = "Richard Dang";
+// var currentArea = null;
+// var voiceClip = null;
+
+var currentLocation = {
+  longitude: 25.75,
+  latitude: -80.37,
+  userName: "Richard Dang Current",
+  currentArea: null,
+  voiceClip: null
+};
+
+var marker1 = {
+  longitude: 25.77,
+  latitude: -80.37,
+  userName: "Richard Dang1",
+  currentArea: null,
+  voiceClip: null
+};
+var marker2 = {
+  longitude: 25.751,
+  latitude: -80.37,
+  userName: "Richard Dang2",
+  currentArea: null,
+  voiceClip: null
+};
+var marker3 = {
+  longitude: 25.77,
+  latitude: -80.41,
+  userName: "Richard Dang3",
+  currentArea: null,
+  voiceClip: null
+};
+
+var markers = [currentLocation, marker1, marker2, marker3];
 
 //Set polling interval
-setInterval(function() {
-    moveMapToLocation(map, longitude, latitude)},
-    3000);
+//setInterval(function() {
+  moveMapToLocation(map, currentLocation.longitude, currentLocation.latitude);
+//}, 3000);
 
 //Call after user records their message and adds a message
 //Data should be obtained from db
-addInfoBubble(map, longitude, latitude);
 
-//TODO: Calculate to show markers only within a distance
+for (i in markers) {
+  addInfoBubble(map, markers[i]);
+}
+
 
 /**
  * Moves the map to display over current location
@@ -49,7 +86,7 @@ addInfoBubble(map, longitude, latitude);
  */
 function moveMapToLocation(map, latitude, longitude) {
   map.setCenter({ lat: latitude, lng: longitude });
-  map.setZoom(14);
+  map.setZoom(16);
 }
 
 /**
@@ -70,7 +107,7 @@ function addMarkerToGroup(group, coordinate, html) {
  * Clicking on a marker opens an infobubble which holds HTML content related to the marker.
  * @param  {H.Map} map      A HERE Map instance within the application
  */
-function addInfoBubble(map, longitude, latitude) {
+function addInfoBubble(map, marker) {
   var group = new H.map.Group();
 
   map.addObject(group);
@@ -91,16 +128,22 @@ function addInfoBubble(map, longitude, latitude) {
     false
   );
 
-    reverseGeocode(group, longitude, latitude);
+  //TODO: Refactor out
+  reverseGeocode(group, marker);
+}
+
+function getVoiceClip(distance) {
+  //hardcoded to distance now
+  return "Voice Clip Holder";
 }
 
 /*
  * @param   {H.service.Platform} platform
  */
-function reverseGeocode(group, longitude, latitude) {
+function reverseGeocode(group, marker) {
   var geocoder = platform.getGeocodingService(),
     parameters = {
-      prox: `${longitude},${latitude}`,
+      prox: `${marker.longitude},${marker.latitude}`,
       mode: "retrieveAreas",
       gen: "9"
     };
@@ -108,17 +151,43 @@ function reverseGeocode(group, longitude, latitude) {
   geocoder.reverseGeocode(
     parameters,
     function(result) {
-        var currentArea = result["Response"]["View"][0]["Result"][0]["Location"]["Address"]["Label"];
-        
-        addMarkerToGroup(
-            group,
-            { lat: longitude, lng: latitude },
-            `<div>${currentArea}` +
-            `</div><div >Longitude:${longitude} Latitude:${latitude}</div>`
-        );
+      marker.currentArea =
+        result["Response"]["View"][0]["Result"][0]["Location"]["Address"][
+          "Label"
+        ];
+
+      var distance = this.distance(currentLocation.latitude, currentLocation.longitude,
+         marker.latitude, marker.longitude).toFixed(2);
+
+      marker.voiceClip = distance < 0.5 ? getVoiceClip() : "";
+
+      addMarkerToGroup(group, { lat: marker.longitude, lng: marker.latitude }, `<div>${marker.userName}</div>
+            <div>Distance: ${distance}</div>
+            <div>Listen: ${marker.voiceClip}</div>
+
+            <div>${marker.currentArea}</div>
+            <div >Longitude:${marker.longitude} Latitude:${marker.latitude}</div>`);
     },
     function(error) {
       alert(error);
     }
   );
+}
+
+//Refactor into new file
+function distance(lat1, lon1, lat2, lon2, unit) {
+  var radlat1 = Math.PI * lat1 / 180
+  var radlat2 = Math.PI * lat2 / 180
+  var theta = lon1 - lon2
+  var radtheta = Math.PI * theta / 180
+  var dist = Math.sin(radlat1) * Math.sin(radlat2) + Math.cos(radlat1) * Math.cos(radlat2) * Math.cos(radtheta);
+  if (dist > 1) {
+    dist = 1;
+  }
+  dist = Math.acos(dist)
+  dist = dist * 180 / Math.PI
+  dist = dist * 60 * 1.1515
+  if (unit == "K") { dist = dist * 1.609344 }
+  if (unit == "N") { dist = dist * 0.8684 }
+  return dist
 }
