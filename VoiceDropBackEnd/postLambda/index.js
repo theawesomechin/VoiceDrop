@@ -39,7 +39,7 @@ function postData(event, context, callback) {
 }
 
 function uploadDataToS3(dataToUpload) {
- 	var filePath = uuid() + '.mp3';
+ 	var filePath = uuid() + '.jpg';
 	var params = {
 		"Body": dataToUpload,
 		"Bucket": S3_BUCKET_NAME,
