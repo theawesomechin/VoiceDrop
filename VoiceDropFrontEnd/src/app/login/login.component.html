@@ -4,10 +4,15 @@
       <ion-menu-button></ion-menu-button>
     </ion-buttons>
     <ion-title>
-      Home
+      Login
     </ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content padding>
+  <form (submit) = "loginUser($event)">
+    <input type="text" placeholder="Username">
+    <br/>
+    <ion-button>Submit</ion-button>
+  </form>
 </ion-content>
